@@ -58,6 +58,7 @@ namespace zbar_ros
     ros::NodeHandle nh_, private_nh_;
     ros::Subscriber camera_sub_;
     ros::Publisher barcode_pub_;
+    ros::Publisher location_pub_;
     ros::Timer clean_timer_;
     zbar::ImageScanner scanner_;
     boost::unordered_map<std::string, ros::Time> barcode_memory_;

@@ -32,6 +32,7 @@
 #include "zbar_ros/barcode_reader_nodelet.h"
 #include "pluginlib/class_list_macros.h"
 #include "std_msgs/String.h"
+#include "zbar_ros/barcodewithlocation.h"
 
 namespace zbar_ros
 {
@@ -46,9 +47,11 @@ namespace zbar_ros
     nh_ = getNodeHandle();
     private_nh_ = getPrivateNodeHandle();
 
-    barcode_pub_ = nh_.advertise<std_msgs::String>("barcode", 10,
+    barcode_pub_ = nh_.advertise<zbar_ros::barcodewithlocation>("barcode", 10,
         boost::bind(&BarcodeReaderNodelet::connectCb, this),
         boost::bind(&BarcodeReaderNodelet::disconnectCb, this));
+
+    //location_pub_ = nh.advertise<zbar_ros::barcodelocation>("location", 10);
     
     private_nh_.param<double>("throttle_repeated_barcodes", throttle_, 0.0);
     if (throttle_ > 0.0){
@@ -88,6 +91,9 @@ namespace zbar_ros
          symbol != zbar_image.symbol_end(); ++symbol)
     {
       std::string barcode = symbol->get_data();
+      int x = symbol->get_location_x(0);
+      int y = symbol->get_location_y(0);
+      int size = symbol->get_location_size();
       // verify if repeated barcode throttling is enabled
       if (throttle_ > 0.0)
       {
@@ -111,8 +117,11 @@ namespace zbar_ros
       }
 
       // publish barcode
-      std_msgs::String barcode_string;
+      zbar_ros::barcodewithlocation barcode_string;
       barcode_string.data = barcode;
+      barcode_string.x = x;
+      barcode_string.y = y;
+      barcode_string.size = size;
       barcode_pub_.publish(barcode_string);
     }
   }

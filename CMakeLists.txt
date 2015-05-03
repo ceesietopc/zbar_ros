@@ -30,9 +30,12 @@ target_link_libraries(barcode_reader_nodelet zbar ${catkin_LIBRARIES})
 add_executable(barcode_reader_node src/barcode_reader_node.cpp)
 target_link_libraries(barcode_reader_node ${catkin_LIBRARIES})
 
+add_executable(qr_kinect_depth src/qr_kinect_depth.cpp)
+target_link_libraries(qr_kinect_depth ${catkin_LIBRARIES})
+
 roslint_cpp()
 
-install(TARGETS barcode_reader_node barcode_reader_nodelet
+install(TARGETS barcode_reader_node barcode_reader_nodelet qr_kinect_depth
 	RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 	LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 	ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})

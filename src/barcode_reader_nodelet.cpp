@@ -91,9 +91,15 @@ namespace zbar_ros
          symbol != zbar_image.symbol_end(); ++symbol)
     {
       std::string barcode = symbol->get_data();
-      int x = symbol->get_location_x(0);
-      int y = symbol->get_location_y(0);
+      int x = 0;
+      int y = 0;
+      for (int i = 0; i < symbol->get_location_size(); i++){
+        x += symbol->get_location_x(i);
+        y += symbol->get_location_y(i);
+      }
       int size = symbol->get_location_size();
+      x /= size;
+      y /= size;
       // verify if repeated barcode throttling is enabled
       if (throttle_ > 0.0)
       {
@@ -121,6 +127,7 @@ namespace zbar_ros
       barcode_string.data = barcode;
       barcode_string.x = x;
       barcode_string.y = y;
+      barcode_string.depth = 0;
       barcode_string.size = size;
       barcode_pub_.publish(barcode_string);
     }

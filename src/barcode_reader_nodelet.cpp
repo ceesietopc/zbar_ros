@@ -80,9 +80,9 @@ namespace zbar_ros
   void BarcodeReaderNodelet::imageCb(const sensor_msgs::ImageConstPtr &image)
   {
     cv_bridge::CvImageConstPtr cv_image;
-    cv_image = cv_bridge::toCvShare(image, "mono16");
+    cv_image = cv_bridge::toCvShare(image, "mono8");
 
-    zbar::Image zbar_image(cv_image->image.cols, cv_image->image.rows, "Y800", cv_image->image.data,
+    zbar::Image zbar_image(cv_image->image.cols, cv_image->image.rows, "GREY", cv_image->image.data,
         cv_image->image.cols * cv_image->image.rows);
     scanner_.scan(zbar_image);
 
@@ -91,9 +91,26 @@ namespace zbar_ros
          symbol != zbar_image.symbol_end(); ++symbol)
     {
       std::string barcode = symbol->get_data();
-      int x = symbol->get_location_x(0);
-      int y = symbol->get_location_y(0);
+
       int size = symbol->get_location_size();
+
+      // Iterate over the accompanying points
+      zbar::Symbol::PointIterator point = symbol->point_begin();
+
+      float avg_x = 0.0;
+      float avg_y = 0.0;
+      // Take the average of the coordinates
+	  for(unsigned int i = 0; i != size; i++)
+      {
+          avg_x += symbol->get_location_x(i);
+          avg_y += symbol->get_location_y(i);
+      }
+      avg_x = avg_x / size;
+      avg_y = avg_y / size;
+
+      float x = avg_x / cv_image->image.cols;
+      float y = avg_y / cv_image->image.rows;
+
       // verify if repeated barcode throttling is enabled
       if (throttle_ > 0.0)
       {
@@ -123,6 +140,7 @@ namespace zbar_ros
       barcode_string.y = y;
       barcode_string.size = size;
       barcode_pub_.publish(barcode_string);
+      return;
     }
   }
 
